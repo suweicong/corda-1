@@ -108,8 +108,15 @@ class EnumEvolutionSerializer(
             val serialisedOrds = ((schemas.schema.types.find { it.name == old.name } as RestrictedType).choices
                     .associateBy({ it.value.toInt() }, { conversions[it.name] }))
 
-            if (ordinals.filterNot { serialisedOrds[it.value] == it.key }.isNotEmpty()) {
-                throw NotSerializableException("Constants have been reordered, additions must be appended to the end")
+            
+            if (ordinals.size <= serialisedOrds.size) {
+                if (ordinals.filterNot { serialisedOrds[it.value] == it.key }.isNotEmpty()) {
+                    throw NotSerializableException("Constants have been reordered, additions must be appended to the end")
+                }
+            } else {
+                if (serialisedOrds.filterNot { ordinals[it.value] == it.key }.isNotEmpty()) {
+                    throw NotSerializableException("Constants have been reordered, additions must be appended to the end")
+                }
             }
 
             return EnumEvolutionSerializer(new.type, factory, conversions, ordinals)
